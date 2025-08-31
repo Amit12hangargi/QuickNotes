@@ -1,0 +1,120 @@
+.container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .content {
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+  
+  .subtitle {
+    font-size: 1.2rem;
+    color: #a0a0a0;
+    margin-bottom: 48px;
+    line-height: 1.5;
+  }
+  
+  .options {
+    display: grid;
+    gap: 20px;
+    margin-bottom: 48px;
+  }
+  
+  .option {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    text-align: left;
+  }
+  
+  .option:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  .option.selected {
+    background: rgba(124, 93, 247, 0.15);
+    border-color: #7c5df7;
+    box-shadow: 0 0 0 4px rgba(124, 93, 247, 0.1);
+  }
+  
+  .icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+  }
+  
+  .text h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 8px 0;
+  }
+  
+  .text p {
+    color: #a0a0a0;
+    margin: 0;
+    line-height: 1.4;
+  }
+  
+  .continueButton {
+    background: linear-gradient(135deg, #7c5df7 0%, #21d4fd 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 32px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.6;
+  }
+  
+  .continueButton:not(:disabled) {
+    opacity: 1;
+  }
+  
+  .continueButton:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(124, 93, 247, 0.3);
+  }
+  
+  .continueButton:disabled {
+    cursor: not-allowed;
+  }
+  
+  @media (max-width: 640px) {
+    .title {
+      font-size: 2rem;
+    }
+    
+    .option {
+      flex-direction: column;
+      text-align: center;
+      gap: 16px;
+    }
+    
+    .icon {
+      font-size: 2rem;
+    }
+  }

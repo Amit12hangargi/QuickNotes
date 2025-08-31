@@ -5,16 +5,48 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeMinimal } from "@supabase/auth-ui-shared";
 import { supabase } from "../lib/supabase";
 import styles from "./page.module.css";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   const [user, setUser] = useState<any>(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const router = useRouter();
 
   const [showToast, setShowToast] = useState(false);
   const toastTimerRef = useRef<number | null>(null);
 
+  // Check if user has completed onboarding
+  const checkOnboardingStatus = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("user_preferences")
+        .select("use_case")
+        .eq("user_id", userId)
+        .single();
+      
+      if (error || !data?.use_case) {
+        // No preferences found, go to onboarding
+        router.replace("/onboarding");
+      } else {
+        // Has preferences, go to notes
+        router.replace("/notes");
+      }
+    } catch (error) {
+      // Error checking, go to onboarding
+      router.replace("/onboarding");
+    }
+  };
+
   useEffect(() => {
     // get current user once
-    supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+      setCheckingAuth(false);
+      // Only redirect if user exists AND has completed onboarding
+      if (user) {
+        checkOnboardingStatus(user.id);
+      }
+    });
 
     // subscribe to auth changes (v2 pattern)
     const {
@@ -24,21 +56,38 @@ export default function Page() {
 
       if (event === "SIGNED_IN") {
         setShowToast(true);
-        // clear any existing timer, then start a new one
         if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
         toastTimerRef.current = window.setTimeout(() => {
           setShowToast(false);
           toastTimerRef.current = null;
         }, 2200);
+        
+        // Check onboarding status before redirecting
+        if (session?.user) {
+          checkOnboardingStatus(session.user.id);
+        }
       }
     });
 
-    // proper cleanup
     return () => {
       if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
       subscription.unsubscribe();
     };
   }, []);
+
+  // Show loading while checking auth
+  if (checkingAuth) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.glassBg} />
+        <div className={styles.centeredContent}>
+          <div className={styles.loginCard}>
+            <p>Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -72,10 +121,10 @@ export default function Page() {
             <Auth
               supabaseClient={supabase}
               theme="default"
-              providers={["google", "apple"]}
+              providers={["google"]}
               socialLayout="horizontal"
               redirectTo={
-                typeof window !== "undefined" ? `${window.location.origin}` : undefined
+                typeof window !== "undefined" ? `${window.location.origin}/onboarding` : undefined
               }
               showLinks
               onlyThirdPartyProviders={false}
@@ -149,21 +198,6 @@ export default function Page() {
     );
   }
 
-  return (
-    <div className={styles.notesPage}>
-      <header className={styles.notesHeader}>
-        <h1>QuickNotes</h1>
-        <button
-          className={styles.signOut}
-          onClick={() => supabase.auth.signOut()}
-        >
-          Sign out
-        </button>
-      </header>
-      <p className={styles.welcomeText}>
-        Signed in as <b>{user.email}</b>.
-      </p>
-      {/* Notes UI goes here */}
-    </div>
-  );
+  // This section won't render anymore since we redirect authenticated users
+  return null;
 }
