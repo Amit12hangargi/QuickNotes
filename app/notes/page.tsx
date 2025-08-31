@@ -35,22 +35,35 @@ export default function NotesPage() {
   }, []);
 
   // Fetch notes (polling fallback when replication/Realtime isn't available)
-  useEffect(() => {
+   // Fetch notes (polling fallback when replication/Realtime isn't available)
+   useEffect(() => {
     if (!userId) return;
     let active = true;
 
     const fetchNotes = async () => {
-      const { data, error } = await supabase
-        .from("notes")
-        .select("id,title,content,created_at,updated_at")
-        .order("created_at", { ascending: false });
-      if (!active) return;
-      if (error) {
-        console.error(error);
-        return;
+      try {
+        const { data, error } = await supabase
+          .from("notes")
+          .select("id,title,content,created_at,updated_at")
+          .order("created_at", { ascending: false });
+        
+        if (!active) return;
+        
+        if (error) {
+          // Only log errors that aren't "no rows returned"
+          if (error.code !== 'PGRST116') {
+            console.warn('Notes fetch warning:', error.message);
+          }
+          return;
+        }
+        
+        setNotes(data ?? []);
+        setLoading(false);
+      } catch (err) {
+        if (active) {
+          console.warn('Notes fetch error:', err);
+        }
       }
-      setNotes(data ?? []);
-      setLoading(false);
     };
 
     setLoading(true);
